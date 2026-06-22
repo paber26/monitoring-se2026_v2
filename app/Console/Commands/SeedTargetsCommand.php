@@ -49,7 +49,11 @@ class SeedTargetsCommand extends Command
             $rows = $petugasSheet->toArray();
             $headers = array_shift($rows);
             $emailIdx = array_search('email', array_map('strtolower', $headers));
-            $namaIdx = array_search('nama', array_map('strtolower', $headers));
+            $namaIdx = array_search('nama lengkap', array_map('strtolower', $headers));
+            if ($namaIdx === false) {
+                // Fallback to 'nama' if 'nama lengkap' not found
+                $namaIdx = array_search('nama', array_map('strtolower', $headers));
+            }
             if ($emailIdx !== false && $namaIdx !== false) {
                 foreach ($rows as $r) {
                     $email = strtolower(trim($r[$emailIdx] ?? ''));
