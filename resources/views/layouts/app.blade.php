@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280">
+    <title>BPS Monitoring</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        sidebar: '#1e293b' // slate-800
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Custom table styling override for overflow handling */
+        .data-table th, .data-table td {
+            white-space: nowrap;
+        }
+        
+        .menu-item.active {
+            background-color: #1e293b; /* slate-800 */
+            color: #ffffff;
+        }
+        .menu-item:not(.active) {
+            color: #cbd5e1; /* slate-300 */
+        }
+        .menu-item.active .nav-icon {
+            color: #0ea5e9; /* brand-500 */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex h-screen overflow-hidden relative">
+
+    @php
+        $roles = \App\Models\Assignment::select('current_user_survey_role_name')
+                    ->whereNotNull('current_user_survey_role_name')
+                    ->where('current_user_survey_role_name', '!=', '')
+                    ->distinct()
+                    ->pluck('current_user_survey_role_name')
+                    ->sort();
+        
+        $lastUpdate = \App\Models\Assignment::max('updated_at');
+        $timeStr = $lastUpdate ? \Carbon\Carbon::parse($lastUpdate)->translatedFormat('d F Y H:i:s') : 'Tidak diketahui';
+    @endphp
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-slate-900/50 z-20 hidden md:hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="absolute inset-y-0 left-0 z-30 w-64 bg-sidebar flex flex-col flex-shrink-0 h-full transition-transform duration-300 -translate-x-full md:relative md:translate-x-0">
+        <!-- Logo Area -->
+        <div class="h-16 md:h-20 flex items-center px-6 border-b border-slate-700/50 justify-between">
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('logo.png') }}" alt="Logo BPS" class="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-sm">
+                <div>
+                    <h1 class="text-white font-bold text-base md:text-lg leading-tight">BPS</h1>
+                    <p class="text-[10px] md:text-xs text-slate-400 font-medium tracking-wider uppercase">Monitoring</p>
+                </div>
+            </div>
+            <button id="closeSidebarBtn" class="md:hidden text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1" id="sideMenu">
+            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 {{ request()->routeIs('dashboard') ? '' : 'text-brand-500' }} transition-colors nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Dashboard Utama</span>
+            </a>
+            <a href="{{ route('progres.kecamatan') }}" class="menu-item {{ request()->routeIs('progres.kecamatan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors group">
+                <i data-lucide="map" class="w-5 h-5 {{ request()->routeIs('progres.kecamatan') ? '' : 'text-slate-400' }} transition-colors nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Progres Kecamatan</span>
+            </a>
+            <a href="{{ route('progres.sls') }}" class="menu-item {{ request()->routeIs('progres.sls') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors group">
+                <i data-lucide="map-pin" class="w-5 h-5 {{ request()->routeIs('progres.sls') ? '' : 'text-slate-400' }} transition-colors nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Progres SLS</span>
+            </a>
+            
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Performa</p>
+            </div>
+            
+            <a href="{{ route('leaderboard') }}" class="menu-item {{ request()->routeIs('leaderboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
+                <i data-lucide="trophy" class="w-5 h-5 text-yellow-500 nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Leaderboard Petugas</span>
+            </a>
+            
+            <a href="{{ route('target.harian') }}" class="menu-item {{ request()->routeIs('target.harian') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
+                <i data-lucide="target" class="w-5 h-5 {{ request()->routeIs('target.harian') ? '' : 'text-slate-400' }} nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Target Harian</span>
+            </a>
+            
+            <!-- Dynamic Role Menus -->
+            @if($roles->count() > 0)
+                <div class="pt-4 pb-2">
+                    <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Peran</p>
+                </div>
+                @foreach($roles as $roleName)
+                    @php 
+                        $isActive = request()->routeIs('role.performa') && request()->route('role') === $roleName;
+                    @endphp
+                    <a href="{{ route('role.performa', $roleName) }}" class="menu-item {{ $isActive ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors group">
+                        <i data-lucide="users" class="w-5 h-5 {{ $isActive ? '' : 'text-slate-400' }} transition-colors nav-icon"></i>
+                        <span class="text-sm font-medium nav-text">{{ $roleName }}</span>
+                    </a>
+                @endforeach
+            @endif
+        </nav>
+        
+        <!-- User Profile (Bottom) -->
+        <div class="p-4 border-t border-slate-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium text-white">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-white">Admin Kab</p>
+                    <p class="text-xs text-slate-400">Minahasa Selatan</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- Mobile Navbar -->
+        <div class="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between flex-shrink-0 shadow-sm z-10">
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('logo.png') }}" alt="Logo BPS" class="w-7 h-7 object-contain">
+                <h1 class="font-bold text-slate-800 text-sm">BPS Monitoring</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="location.reload()" class="p-2 text-brand-600 hover:bg-brand-50 rounded-lg">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                </button>
+                <button id="menuToggle" class="p-2 -mr-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="bg-white px-4 md:px-8 py-4 md:py-5 border-b border-slate-200 flex-shrink-0 z-10 shadow-sm hidden md:block">
+            <div class="flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800">Monitoring Pencacahan SE2026 Minahasa Selatan</h2>
+                    <div class="flex items-center gap-2 mt-1 text-xs md:text-sm text-slate-500">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <p>Kondisi terakhir diupdate: <span class="font-medium text-slate-700">{{ $timeStr }}</span></p>
+                    </div>
+                </div>
+                <div class="flex gap-2 self-start md:self-auto">
+                    <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Upload Data Monitoring
+                    </button>
+                </div>
+            </div>
+            
+            @if(session('success'))
+                <div class="mt-4 p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
+                    <span class="font-medium">Berhasil!</span> {{ session('success') }}
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="mt-4 p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+                    <span class="font-medium">Error!</span> {{ session('error') }}
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="mt-4 p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+                    <span class="font-medium">Validasi Gagal:</span>
+                    <ul class="list-disc pl-5 mt-1">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            @yield('content')
+            <div class="h-12"></div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        
+        const menuToggle = document.getElementById('menuToggle');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                mobileOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    sidebar.classList.remove('-translate-x-full');
+                    mobileOverlay.classList.remove('opacity-0');
+                }, 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                mobileOverlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    mobileOverlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
+        if (mobileOverlay) mobileOverlay.addEventListener('click', toggleSidebar);
+    </script>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="document.getElementById('uploadModal').classList.add('hidden')"></div>
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative z-10 mx-4">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-bold text-slate-800">Upload Data Monitoring</h3>
+                <button onclick="document.getElementById('uploadModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form action="{{ route('upload') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-5">
+                    <label class="block mb-2 text-sm font-medium text-slate-700" for="file">Pilih file Data Monitoring (Excel/CSV)</label>
+                    <input class="block w-full text-sm text-slate-500 border border-slate-300 rounded-lg cursor-pointer bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500" id="file" name="file" type="file" accept=".xlsx,.xls,.csv" required>
+                    <p class="mt-1 text-xs text-slate-500">Maksimal 50MB.</p>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="document.getElementById('uploadModal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-300 transition-colors">Batal</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @stack('scripts')
+</body>
+</html>

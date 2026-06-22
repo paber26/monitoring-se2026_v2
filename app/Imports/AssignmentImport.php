@@ -7,13 +7,26 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithUpserts;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
-class AssignmentImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunkReading
+class AssignmentImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunkReading, WithUpserts
 {
+    public function uniqueBy()
+    {
+        return 'fasih_id';
+    }
+
     public function model(array $row)
     {
+        // The Fasih id could be just 'id' in excel
+        $fasihId = $row['id'] ?? null;
+        if (!$fasihId) {
+            return null; // Skip if no ID
+        }
+
         return new Assignment([
+            'fasih_id'                      => $fasihId,
             'date_created'                  => isset($row['date_created']) ? $this->parseDate($row['date_created']) : null,
             'date_modified'                 => isset($row['date_modified']) ? $this->parseDate($row['date_modified']) : null,
             'assignment_status_alias'       => $row['assignment_status_alias'] ?? null,

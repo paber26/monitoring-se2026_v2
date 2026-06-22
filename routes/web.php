@@ -44,3 +44,10 @@ Route::get('/api/metadata', function () {
         'file_timestamp' => $timeStr
     ]);
 });
+
+Route::get('/', [AssignmentController::class, 'index'])->name('dashboard');
+Route::get('/progres-kecamatan', [AssignmentController::class, 'progresKecamatan'])->name('progres.kecamatan');
+Route::get('/progres-sls', [AssignmentController::class, 'progresSls'])->name('progres.sls');
+Route::get('/leaderboard', [AssignmentController::class, 'leaderboard'])->name('leaderboard');
+Route::get('/target-harian', [AssignmentController::class, 'targetHarian'])->name('target.harian');
+Route::get('/role/{role}', [AssignmentController::class, 'performaRole'])->name('role.performa');
