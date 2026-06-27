@@ -92,15 +92,15 @@
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">Tidak Ada Target</span>
                                 @elseif($isFinished)
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
-                                        <i data-lucide="check-circle" class="w-3 h-3"></i> Selesai
+                                        <i data-lucide="check-circle" class="w-3 h-3"></i> Tercapai
                                     </span>
                                 @elseif($isLate)
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                                        <i data-lucide="alert-circle" class="w-3 h-3"></i> Terlambat
+                                        <i data-lucide="alert-circle" class="w-3 h-3"></i> Tertinggal
                                     </span>
                                 @else
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-brand-100 text-brand-800">
-                                        <i data-lucide="trending-up" class="w-3 h-3"></i> On Track
+                                        <i data-lucide="trending-up" class="w-3 h-3"></i> Tercapai
                                     </span>
                                 @endif
                             </td>
