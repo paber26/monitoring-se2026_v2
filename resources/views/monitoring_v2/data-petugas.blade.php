@@ -11,10 +11,10 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        {{-- <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <p class="text-sm text-slate-500 font-medium mb-1">Total Petugas</p>
             <p class="text-3xl font-bold text-slate-800">{{ number_format($summaries['total_petugas'], 0, ',', '.') }}</p>
-        </div>
+        </div> --}}
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <p class="text-sm text-slate-500 font-medium mb-1">Total Open</p>
             <p class="text-3xl font-bold text-blue-600">{{ number_format($summaries['open'], 0, ',', '.') }}</p>

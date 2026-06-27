@@ -137,15 +137,15 @@
                 <span class="text-sm font-medium nav-text">Target Harian</span>
             </a>
 
-            <a href="{{ route('queries') }}" class="menu-item {{ request()->routeIs('queries') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
+            {{-- <a href="{{ route('queries') }}" class="menu-item {{ request()->routeIs('queries') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
                 <i data-lucide="database" class="w-5 h-5 {{ request()->routeIs('queries') ? '' : 'text-slate-400' }} nav-icon"></i>
                 <span class="text-sm font-medium nav-text">Query Update</span>
-            </a>
+            </a> --}}
 
-            <a href="{{ route('data.petugas') }}" class="menu-item {{ request()->routeIs('data.petugas') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
+            {{-- <a href="{{ route('data.petugas') }}" class="menu-item {{ request()->routeIs('data.petugas') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
                 <i data-lucide="users" class="w-5 h-5 {{ request()->routeIs('data.petugas') ? '' : 'text-slate-400' }} nav-icon"></i>
                 <span class="text-sm font-medium nav-text">Data Petugas</span>
-            </a>
+            </a> --}}
             
             <!-- Dynamic Role Menus -->
             @if($roles->count() > 0)
@@ -209,11 +209,11 @@
                 <div>
                     <h2 class="text-xl md:text-2xl font-bold text-slate-800">Monitoring Pencacahan SE2026 Minahasa Selatan</h2>
                 </div>
-                <div class="flex gap-2 self-start md:self-auto">
+                {{-- <div class="flex gap-2 self-start md:self-auto">
                     <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm">
                         <i data-lucide="upload" class="w-4 h-4"></i> Upload Data Monitoring
                     </button>
-                </div>
+                </div> --}}
             </div>
             
             @if(session('success'))

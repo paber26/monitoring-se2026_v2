@@ -281,7 +281,8 @@ class MonitoringV2Controller extends Controller
                             'name' => $username,
                             'role' => $roleName,
                             'total' => 0,
-                            'kecamatans' => []
+                            'kecamatans' => [],
+                            'sls_details' => []
                         ];
                     }
                     $leaderboard[$userKey]['total'] += $realisasi;
@@ -290,6 +291,23 @@ class MonitoringV2Controller extends Controller
                         $leaderboard[$userKey]['kecamatans'][$kecamatan] = 0;
                     }
                     $leaderboard[$userKey]['kecamatans'][$kecamatan] += $realisasi;
+                    
+                    // Add SLS detail
+                    $leaderboard[$userKey]['sls_details'][] = [
+                        'kode_sls' => $slsCode,
+                        'nama_sls' => $slsTargets[$slsCode]->meta['nama_sls'] ?? '',
+                        'desa' => $slsTargets[$slsCode]->meta['nmdesa'] ?? '',
+                        'open' => $p->open,
+                        'draft' => $p->draft,
+                        'submit_pencacah' => $p->submitted_by_pencacah,
+                        'submit_respondent' => $p->submitted_respondent,
+                        'approved' => $p->approved_by_pengawas,
+                        'rejected' => $p->rejected_by_pengawas,
+                        'revoked' => $p->revoked_by_pengawas,
+                        'completed' => $p->completed_by_admin_kabupaten,
+                        'realisasi' => $realisasi,
+                        'target' => $slsTargets[$slsCode]->target_value ?? 0
+                    ];
                 }
             }
         }
