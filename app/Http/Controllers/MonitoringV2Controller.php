@@ -189,11 +189,12 @@ class MonitoringV2Controller extends Controller
                     : ($slsTargets[$slsCode]->meta['pml_name'] ?? '');
                 
                 if (!empty($username) && trim($username) !== '-' && trim($username) !== '' && strtolower(trim($username)) !== 'nan') {
-                    $userKey = $username . '|' . $roleName;
+                    $normalizedName = strtolower(trim($username));
+                    $userKey = $normalizedName . '|' . $roleName;
                     
                     if (!isset($leaderboard[$userKey])) {
                         $leaderboard[$userKey] = [
-                            'username' => $username,
+                            'username' => $normalizedName,
                             'name' => $username,
                             'role' => $roleName,
                             'total' => 0,
@@ -217,7 +218,11 @@ class MonitoringV2Controller extends Controller
         $pclData = array_slice(array_filter($leaderboard, fn($d) => $d['role'] === 'Pencacah'), 0, 10);
         $pmlData = array_slice(array_filter($leaderboard, fn($d) => $d['role'] === 'Pengawas'), 0, 10);
         
-        $targets = \App\Models\Target::where('type', 'user')->pluck('target_value', 'key')->toArray();
+        $targetsArray = \App\Models\Target::where('type', 'user')->pluck('target_value', 'key')->toArray();
+        $targets = [];
+        foreach ($targetsArray as $k => $v) {
+            $targets[strtolower(trim($k))] = $v;
+        }
 
         return view('monitoring_v2.leaderboard', compact('pclData', 'pmlData', 'targets'));
     }
@@ -273,11 +278,12 @@ class MonitoringV2Controller extends Controller
                     : ($slsTargets[$slsCode]->meta['pml_name'] ?? '');
                 
                 if (!empty($username) && trim($username) !== '-' && trim($username) !== '' && strtolower(trim($username)) !== 'nan') {
-                    $userKey = $username . '|' . $roleName;
+                    $normalizedName = strtolower(trim($username));
+                    $userKey = $normalizedName . '|' . $roleName;
                     
                     if (!isset($leaderboard[$userKey])) {
                         $leaderboard[$userKey] = [
-                            'username' => $username,
+                            'username' => $normalizedName,
                             'name' => $username,
                             'role' => $roleName,
                             'total' => 0,
@@ -324,7 +330,11 @@ class MonitoringV2Controller extends Controller
             return $b['total'] <=> $a['total'];
         });
         
-        $targets = \App\Models\Target::where('type', 'user')->pluck('target_value', 'key')->toArray();
+        $targetsArray = \App\Models\Target::where('type', 'user')->pluck('target_value', 'key')->toArray();
+        $targets = [];
+        foreach ($targetsArray as $k => $v) {
+            $targets[strtolower(trim($k))] = $v;
+        }
 
         // Pass 'role' variable to view instead of 'roleFilter' to match blade template
         $role = $roleFilter;
@@ -359,9 +369,10 @@ class MonitoringV2Controller extends Controller
             }
             
             if (!empty($username) && trim($username) !== '-' && trim($username) !== '' && strtolower(trim($username)) !== 'nan') {
-                if (!isset($leaderboard[$username])) {
-                    $leaderboard[$username] = [
-                        'username' => $username,
+                $normalizedName = strtolower(trim($username));
+                if (!isset($leaderboard[$normalizedName])) {
+                    $leaderboard[$normalizedName] = [
+                        'username' => $normalizedName,
                         'name' => $username,
                         'total' => 0,
                         'target' => 0,
@@ -378,14 +389,14 @@ class MonitoringV2Controller extends Controller
                              
                 $targetVal = $slsTargets[$slsCode]->target_value ?? 0;
                 
-                $leaderboard[$username]['total'] += $realisasi;
-                $leaderboard[$username]['target'] += $targetVal;
-                $leaderboard[$username]['sls_count']++;
+                $leaderboard[$normalizedName]['total'] += $realisasi;
+                $leaderboard[$normalizedName]['target'] += $targetVal;
+                $leaderboard[$normalizedName]['sls_count']++;
                 
-                if (!isset($leaderboard[$username]['kecamatans'][$kecamatan])) {
-                    $leaderboard[$username]['kecamatans'][$kecamatan] = 0;
+                if (!isset($leaderboard[$normalizedName]['kecamatans'][$kecamatan])) {
+                    $leaderboard[$normalizedName]['kecamatans'][$kecamatan] = 0;
                 }
-                $leaderboard[$username]['kecamatans'][$kecamatan] += $realisasi;
+                $leaderboard[$normalizedName]['kecamatans'][$kecamatan] += $realisasi;
                 
                 // Add statuses
                 $statuses = [
@@ -401,15 +412,15 @@ class MonitoringV2Controller extends Controller
                 
                 foreach ($statuses as $st => $val) {
                     if ($val > 0) {
-                        if (!isset($leaderboard[$username]['statuses'][$st])) {
-                            $leaderboard[$username]['statuses'][$st] = 0;
+                        if (!isset($leaderboard[$normalizedName]['statuses'][$st])) {
+                            $leaderboard[$normalizedName]['statuses'][$st] = 0;
                         }
-                        $leaderboard[$username]['statuses'][$st] += $val;
+                        $leaderboard[$normalizedName]['statuses'][$st] += $val;
                     }
                 }
                 
                 // Add SLS detail
-                $leaderboard[$username]['sls_details'][] = [
+                $leaderboard[$normalizedName]['sls_details'][] = [
                     'kode_sls' => $slsCode,
                     'nama_sls' => $slsTargets[$slsCode]->meta['nama_sls'] ?? '',
                     'desa' => $slsTargets[$slsCode]->meta['nmdesa'] ?? '',
@@ -431,7 +442,11 @@ class MonitoringV2Controller extends Controller
             return $b['total'] <=> $a['total'];
         });
         
-        $targets = \App\Models\Target::where('type', 'user')->pluck('target_value', 'key')->toArray();
+        $targetsArray = \App\Models\Target::where('type', 'user')->pluck('target_value', 'key')->toArray();
+        $targets = [];
+        foreach ($targetsArray as $k => $v) {
+            $targets[strtolower(trim($k))] = $v;
+        }
 
         return view('monitoring_v2.role', compact('role', 'leaderboard', 'targets', 'isPML'));
     }
