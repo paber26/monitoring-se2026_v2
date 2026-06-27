@@ -247,7 +247,7 @@ class MonitoringV2Controller extends Controller
             }
         };
         
-        $workingDays = $calcWorkingDays($startDate, '2026-07-15');
+        $workingDays = 60; // Fixed working days based on user requirement
         $elapsedWorkingDays = $calcWorkingDays($startDate, $currentDate);
         
         $petugasList = \App\Models\Petugas::all();

@@ -21,8 +21,8 @@
                     <input type="date" name="current_date" value="{{ $currentDate }}" onchange="document.getElementById('filterForm').submit()" class="bg-white border border-slate-200 text-slate-700 py-2 px-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Hari Kerja (Tanpa Minggu)</label>
-                    <input type="number" value="{{ $workingDays }}" class="bg-slate-100 border border-slate-200 text-slate-500 py-2 px-3 rounded-lg text-sm w-24 font-bold cursor-not-allowed focus:outline-none pointer-events-none" readonly disabled tabindex="-1">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Hari Pencacahan (Tanpa Minggu) Ke-</label>
+                    <input type="number" value="{{ $elapsedWorkingDays }}" class="bg-slate-100 border border-slate-200 text-slate-500 py-2 px-3 rounded-lg text-sm w-24 font-bold cursor-not-allowed focus:outline-none pointer-events-none" readonly disabled tabindex="-1">
                 </div>
                 <div class="flex-1 min-w-[20px]"></div>
                 <div class="relative">
@@ -66,6 +66,11 @@
                             $domKec = array_key_first($d['kecamatans']);
                             $targetVal = $targets[$d['username']] ?? 0;
                             $targetPerHari = $workingDays > 0 ? ($targetVal / $workingDays) : 0;
+                            
+                            $minTarget = floor($targetPerHari);
+                            $maxTarget = ceil($targetPerHari);
+                            $targetRangeText = ($minTarget == $maxTarget) ? $minTarget : $minTarget . ' sd ' . $maxTarget;
+                            
                             $targetSdHariIni = min($targetVal, $targetPerHari * $elapsedWorkingDays);
                             $isLate = $d['total'] < $targetSdHariIni;
                             $isFinished = $d['total'] >= $targetVal;
@@ -75,7 +80,7 @@
                             <td class="px-6 py-3 font-semibold text-slate-800">{{ $d['name'] }}</td>
                             <td class="px-6 py-3 text-slate-600">{{ $domKec }}</td>
                             <td class="px-6 py-3 text-right font-semibold text-slate-700">{{ number_format($targetVal, 0, ',', '.') }}</td>
-                            <td class="px-6 py-3 text-right font-semibold text-slate-500">{{ number_format($targetPerHari, 1, ',', '.') }}</td>
+                            <td class="px-6 py-3 text-right font-semibold text-slate-500">{{ $targetRangeText }}</td>
                             <td class="px-6 py-3 text-right font-semibold text-brand-700 bg-brand-50/30">{{ number_format($targetSdHariIni, 1, ',', '.') }}</td>
                             <td class="px-6 py-3 text-right bg-emerald-50/30">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $isFinished ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800' }}">
