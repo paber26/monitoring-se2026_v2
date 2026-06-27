@@ -12,7 +12,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="icon" type="image/png" href="{{ asset('logo-small.png') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     
     <script>
@@ -91,7 +93,7 @@
         <!-- Logo Area -->
         <div class="h-16 md:h-20 flex items-center px-6 border-b border-slate-700/50 justify-between">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('logo.png') }}" alt="Logo BPS" class="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-sm">
+                <img src="{{ asset('logo-small.png') }}" alt="Logo BPS" class="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-sm">
                 <div>
                     <h1 class="text-white font-bold text-base md:text-lg leading-tight">BPS</h1>
                     <p class="text-[10px] md:text-xs text-slate-400 font-medium tracking-wider uppercase">Monitoring</p>
@@ -104,8 +106,12 @@
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1" id="sideMenu">
+            <a href="{{ route('dashboard.desa') }}" class="menu-item {{ request()->routeIs('dashboard.desa') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 {{ request()->routeIs('dashboard.desa') ? '' : 'text-brand-500' }} transition-colors nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Dashboard Desa</span>
+            </a>
             <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors group">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 {{ request()->routeIs('dashboard') ? '' : 'text-brand-500' }} transition-colors nav-icon"></i>
+                <i data-lucide="pie-chart" class="w-5 h-5 {{ request()->routeIs('dashboard') ? '' : 'text-slate-400' }} transition-colors nav-icon"></i>
                 <span class="text-sm font-medium nav-text">Dashboard Utama</span>
             </a>
             <a href="{{ route('progres.kecamatan') }}" class="menu-item {{ request()->routeIs('progres.kecamatan') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors group">
@@ -130,6 +136,16 @@
                 <i data-lucide="target" class="w-5 h-5 {{ request()->routeIs('target.harian') ? '' : 'text-slate-400' }} nav-icon"></i>
                 <span class="text-sm font-medium nav-text">Target Harian</span>
             </a>
+
+            <a href="{{ route('queries') }}" class="menu-item {{ request()->routeIs('queries') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
+                <i data-lucide="database" class="w-5 h-5 {{ request()->routeIs('queries') ? '' : 'text-slate-400' }} nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Query Update</span>
+            </a>
+
+            <a href="{{ route('data.petugas') }}" class="menu-item {{ request()->routeIs('data.petugas') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors relative group">
+                <i data-lucide="users" class="w-5 h-5 {{ request()->routeIs('data.petugas') ? '' : 'text-slate-400' }} nav-icon"></i>
+                <span class="text-sm font-medium nav-text">Data Petugas</span>
+            </a>
             
             <!-- Dynamic Role Menus -->
             @if($roles->count() > 0)
@@ -144,6 +160,15 @@
                 @endforeach
             @endif
         </nav>
+        <div class="px-4 pb-4">
+            <div class="flex items-center justify-between text-xs text-slate-400 bg-slate-800 rounded-md px-3 py-2">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="bar-chart" class="w-4 h-4 text-brand-500"></i>
+                    <span>Total Akses</span>
+                </div>
+                <span class="font-bold text-white">{{ isset($visitorCount) ? number_format($visitorCount, 0, ',', '.') : 0 }}</span>
+            </div>
+        </div>
         
         <!-- User Profile (Bottom) -->
         <div class="p-4 border-t border-slate-700/50">
@@ -165,7 +190,7 @@
         <!-- Mobile Navbar -->
         <div class="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between flex-shrink-0 shadow-sm z-10">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('logo.png') }}" alt="Logo BPS" class="w-7 h-7 object-contain">
+                <img src="{{ asset('logo-small.png') }}" alt="Logo BPS" class="w-7 h-7 object-contain">
                 <h1 class="font-bold text-slate-800 text-sm">BPS Monitoring</h1>
             </div>
             <div class="flex items-center gap-2">
@@ -183,10 +208,6 @@
             <div class="flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
                 <div>
                     <h2 class="text-xl md:text-2xl font-bold text-slate-800">Monitoring Pencacahan SE2026 Minahasa Selatan</h2>
-                    <div class="flex items-center gap-2 mt-1 text-xs md:text-sm text-slate-500">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                        <p>Kondisi terakhir diupdate: <span class="font-medium text-slate-700">{{ $timeStr }}</span></p>
-                    </div>
                 </div>
                 <div class="flex gap-2 self-start md:self-auto">
                     <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm">

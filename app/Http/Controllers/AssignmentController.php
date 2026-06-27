@@ -366,4 +366,86 @@ class AssignmentController extends Controller
         ]);
         return response()->json($progress);
     }
+
+    public function queries()
+    {
+        $jsonPath = storage_path('app/public/queries.json');
+        $queries = [];
+        
+        if (file_exists($jsonPath)) {
+            $queries = json_decode(file_get_contents($jsonPath), true);
+            
+            $kecamatanNames = \App\Models\Assignment::selectRaw('SUBSTRING(level_6_full_code, 1, 7) as level_3_code, level_3_name')
+                ->whereNotNull('level_6_full_code')
+                ->whereNotNull('level_3_name')
+                ->distinct()
+                ->get()
+                ->pluck('level_3_name', 'level_3_code')
+                ->toArray();
+            
+            // Group by kecamatan
+            $groupedQueries = [];
+            foreach ($queries as $q) {
+                $kecCode = $q['kecamatan'];
+                $kecName = $kecamatanNames[$kecCode] ?? $kecCode;
+                
+                if (!isset($groupedQueries[$kecCode])) {
+                    $groupedQueries[$kecCode] = [
+                        'code' => $kecCode,
+                        'name' => $kecName,
+                        'total_assignment' => 0,
+                        'chunks' => []
+                    ];
+                }
+                $groupedQueries[$kecCode]['total_assignment'] += $q['total_assignment'];
+                $groupedQueries[$kecCode]['chunks'][] = $q;
+            }
+            
+            // Sort by name
+            uasort($groupedQueries, function($a, $b) {
+                return $a['name'] <=> $b['name'];
+            });
+            
+            $queries = $groupedQueries;
+        }
+
+        return view('monitoring.queries', compact('queries'));
+    }
+    public function dashboardDesa()
+    {
+        return view('monitoring.dashboard-desa');
+    }
+
+    public function dataPetugas()
+    {
+        $petugasList = \App\Models\Petugas::all();
+        
+        $summaries = [
+            'total_petugas' => $petugasList->count(),
+            'open' => $petugasList->sum('open'),
+            'draft' => $petugasList->sum('draft'),
+            'submitted_by_pencacah' => $petugasList->sum('submitted_by_pencacah'),
+            'approved_by_pengawas' => $petugasList->sum('approved_by_pengawas'),
+            'rejected_by_pengawas' => $petugasList->sum('rejected_by_pengawas'),
+            'submitted_respondent' => $petugasList->sum('submitted_respondent'),
+            'revoked_by_pengawas' => $petugasList->sum('revoked_by_pengawas'),
+            'completed_by_admin_kabupaten' => $petugasList->sum('completed_by_admin_kabupaten'),
+        ];
+        
+        return view('monitoring.data-petugas', compact('petugasList', 'summaries'));
+    }
+
+    public function uploadPetugas(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:51200',
+        ]);
+
+        try {
+            Excel::import(new \App\Imports\PetugasImport, $request->file('file'));
+            return redirect()->back()->with('success', 'Data petugas berhasil diunggah dan diupdate.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
 }

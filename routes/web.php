@@ -5,7 +5,7 @@ use App\Http\Controllers\AssignmentController;
 use App\Models\Assignment;
 use App\Models\Target;
 
-Route::get('/', [AssignmentController::class, 'index'])->name('dashboard');
+// removed
 Route::post('/upload', [AssignmentController::class, 'upload'])->name('upload');
 Route::get('/upload-progress', [AssignmentController::class, 'progress'])->name('upload.progress');
 
@@ -46,9 +46,15 @@ Route::get('/api/metadata', function () {
     ]);
 });
 
-Route::get('/', [AssignmentController::class, 'index'])->name('dashboard');
+Route::get('/dashboard-utama', [AssignmentController::class, 'index'])->name('dashboard');
 Route::get('/progres-kecamatan', [AssignmentController::class, 'progresKecamatan'])->name('progres.kecamatan');
 Route::get('/progres-sls', [AssignmentController::class, 'progresSls'])->name('progres.sls');
+Route::get('/', [AssignmentController::class, 'dashboardDesa'])->name('dashboard.desa');
 Route::get('/leaderboard', [AssignmentController::class, 'leaderboard'])->name('leaderboard');
 Route::get('/target-harian', [AssignmentController::class, 'targetHarian'])->name('target.harian');
 Route::get('/role/{role}', [AssignmentController::class, 'performaRole'])->name('role.performa');
+Route::get('/queries', [AssignmentController::class, 'queries'])->name('queries');
+
+// Data Petugas
+Route::get('/data-petugas', [AssignmentController::class, 'dataPetugas'])->name('data.petugas');
+Route::post('/data-petugas/upload', [AssignmentController::class, 'uploadPetugas'])->name('data.petugas.upload');
